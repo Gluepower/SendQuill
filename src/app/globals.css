@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* CSS Variables are now handled by the Tailwind Theme Plugin */
+
+/* Body defaults */
+body {
+  background-color: var(--color-bg-body);
+  color: var(--color-text-primary);
+}
+
+@layer components {
+  /* Card components */
+  .card {
+    @apply bg-light-card dark:bg-dark-card rounded-xl shadow-md p-4 
+           dark:border dark:border-dark-accent dark:text-dark-text;
+  }
+
+  /* KPI card styling */
+  .kpi-card {
+    @apply bg-light-card dark:bg-dark-card rounded-lg p-5 shadow-md 
+           hover:shadow-lg transition-all duration-200 hover:scale-105
+           dark:border dark:border-dark-accent dark:text-dark-text;
+  }
+
+  /* Chart container */
+  .chart-container {
+    @apply bg-light-card dark:bg-dark-card rounded-xl p-4 mb-4 shadow-md
+           dark:border dark:border-dark-accent;
+  }
+  
+  /* Action card styling for consistency */
+  .action-card {
+    @apply h-full rounded-lg p-6 shadow-md transition-all duration-200
+           dark:border dark:border-dark-accent dark:text-dark-text;
+  }
+  
+  /* Form controls */
+  input, select, textarea {
+    @apply bg-light-card dark:bg-dark-card 
+           border border-light-border dark:border-dark-accent 
+           rounded-md p-2 text-light-text dark:text-dark-text
+           dark:placeholder-dark-muted/70;
+  }
+  
+  /* Button styles */
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors;
+  }
+  
+  /* Primary button */
+  .btn-primary {
+    @apply bg-brand-primary dark:bg-brand-primaryDark 
+           text-white dark:text-dark-bg hover:opacity-90;
+  }
+  
+  /* Large primary button (uses darker variant for better contrast in dark mode) */
+  .btn-primary-large {
+    @apply p-3 px-6 bg-brand-primary dark:bg-brand-primaryDarker
+           text-white dark:text-dark-bright hover:opacity-90;
+  }
+  
+  /* Secondary button */
+  .btn-secondary {
+    @apply bg-brand-secondary dark:bg-brand-secondaryDark
+           text-white dark:text-dark-bg hover:opacity-90;
+  }
+  
+  /* Secondary large button */
+  .btn-secondary-large {
+    @apply p-3 px-6 bg-brand-secondary dark:bg-brand-secondaryDarker
+           text-white dark:text-dark-bright hover:opacity-90;
+  }
+  
+  /* Outline button */
+  .btn-outline {
+    @apply border border-brand-primary dark:border-brand-primaryDark
+           text-brand-primary dark:text-brand-primaryDark
+           hover:bg-brand-primary/10 dark:hover:bg-brand-primaryDark/10;
+  }
+  
+  /* Status badges - Small elements */
+  .status-badge {
+    @apply px-2 py-0.5 text-xs font-medium rounded-full;
+  }
+  
+  /* Success badge */
+  .status-success {
+    @apply bg-brand-success dark:bg-brand-successDark
+           text-white dark:text-dark-bg;
+  }
+  
+  /* Warning badge */
+  .status-warning {
+    @apply bg-brand-warning dark:bg-brand-warningDark
+           text-white dark:text-dark-bg;
+  }
+  
+  /* Error badge */
+  .status-error {
+    @apply bg-brand-error dark:bg-brand-errorDark
+           text-white dark:text-dark-bg;
+  }
+  
+  /* Status panels - Larger elements (uses darker colors in dark mode) */
+  .status-panel {
+    @apply p-4 rounded-lg;
+  }
+  
+  /* Success panel */
+  .status-panel-success {
+    @apply bg-brand-success/20 dark:bg-brand-successDarker
+           text-brand-success dark:text-dark-bright;
+  }
+  
+  /* Warning panel */
+  .status-panel-warning {
+    @apply bg-brand-warning/20 dark:bg-brand-warningDarker
+           text-brand-warning dark:text-dark-bright;
+  }
+  
+  /* Error panel */
+  .status-panel-error {
+    @apply bg-brand-error/20 dark:bg-brand-errorDarker
+           text-brand-error dark:text-dark-bright;
+  }
+  
+  /* Table styling */
+  table {
+    @apply w-full border-collapse;
+  }
+  
+  table thead tr {
+    @apply bg-light-card dark:bg-dark-card;
+  }
+  
+  table th {
+    @apply py-3 px-4 text-left font-medium text-light-text dark:text-dark-text;
+  }
+  
+  table td {
+    @apply py-3 px-4 border-t border-light-border
+           dark:border-dark-accent dark:text-dark-muted;
+  }
+  
+  .dark table tbody tr:hover {
+    @apply bg-dark-accent/30;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+}
