@@ -179,7 +179,18 @@ export default function AIPromptStudioPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to generate text");
+        let errorMessage = data.error || "Failed to generate text";
+        
+        // Provide more user-friendly error messages for common issues
+        if (errorMessage.includes("API key")) {
+          errorMessage = "Invalid API key. Please check your OpenAI API key in the .env.local file.";
+        } else if (errorMessage.includes("quota") || errorMessage.includes("rate limit")) {
+          errorMessage = "You've exceeded your OpenAI API quota or rate limit. Check your OpenAI account billing details or try again later.";
+        } else if (errorMessage.includes("not available")) {
+          errorMessage = "The selected model is not available for your API key. You may need to join a waitlist or upgrade your OpenAI account.";
+        }
+        
+        throw new Error(errorMessage);
       }
 
       setApiResponse(data.text);
@@ -270,12 +281,22 @@ export default function AIPromptStudioPage() {
                   onChange={(e) => handleInputChange("model", e.target.value)}
                   className="w-full p-2 border rounded dark:bg-dark-input dark:border-dark-accent"
                 >
-                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                  <option value="gpt-4">GPT-4</option>
-                  <option value="gpt-4o">GPT-4o</option>
-                  <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                  <option value="gpt-4-vision-preview">GPT-4 Vision</option>
+                  {/* GPT-4 Models */}
+                  <optgroup label="GPT-4 Models">
+                    <option value="gpt-4o">GPT-4o</option>
+                    <option value="gpt-4o-mini">GPT-4o mini</option>
+                    <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                    <option value="gpt-4">GPT-4</option>
+                  </optgroup>
+                  
+                  {/* GPT-3.5 Models */}
+                  <optgroup label="GPT-3.5 Models">
+                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                  </optgroup>
                 </select>
+                <div className="text-xs text-gray-500 mt-1">
+                  Note: More advanced models (like GPT-4) may require API quota or paid credits
+                </div>
               </div>
 
               <div>
