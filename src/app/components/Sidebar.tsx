@@ -51,6 +51,11 @@ export default function Sidebar() {
           isActive={pathname === "/campaigns" || pathname.startsWith("/campaigns/")} 
         />
         <NavItem 
+          href="/ai-prompt-studio" 
+          label="AI Prompt Studio" 
+          isActive={pathname === "/ai-prompt-studio" || pathname.startsWith("/ai-prompt-studio/")} 
+        />
+        <NavItem 
           href="/analytics" 
           label="Analytics" 
           isActive={pathname === "/analytics"} 
