@@ -46,6 +46,11 @@ export default function NewCampaignPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
   const [availableFields, setAvailableFields] = useState<string[]>(['email']);
+  const [useAICustomization, setUseAICustomization] = useState(false);
+  const [aiTemplates, setAITemplates] = useState<{id: string, name: string}[]>([]);
+  const [selectedAITemplate, setSelectedAITemplate] = useState<string>('');
+  const [aiTemplateContent, setAITemplateContent] = useState<string>('');
+  const [isLoadingAITemplate, setIsLoadingAITemplate] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -319,6 +324,97 @@ export default function NewCampaignPage() {
     }
   };
 
+  // Add a function to fetch AI templates from localStorage
+  const fetchAITemplates = () => {
+    try {
+      const savedPromptsStr = localStorage.getItem("aiPrompts");
+      if (savedPromptsStr) {
+        const parsed = JSON.parse(savedPromptsStr);
+        setAITemplates(parsed.map((p: any) => ({ id: p.id, name: p.name })));
+      }
+    } catch (error) {
+      console.error("Error loading AI templates:", error);
+    }
+  };
+
+  // Load AI templates when component mounts
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchAITemplates();
+    }
+  }, [isAuthenticated]);
+
+  // Function to fetch and apply AI template content
+  const fetchAITemplateContent = async (templateId: string) => {
+    if (!templateId) return;
+    
+    setIsLoadingAITemplate(true);
+    try {
+      const savedPromptsStr = localStorage.getItem("aiPrompts");
+      if (savedPromptsStr) {
+        const parsed = JSON.parse(savedPromptsStr);
+        const template = parsed.find((p: any) => p.id === templateId);
+        
+        if (template) {
+          // Generate content using the OpenAI API
+          const response = await fetch("/api/openai/generate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              prompt: template.prompt,
+              model: template.model || "gpt-3.5-turbo",
+              temperature: template.temperature || 0.7,
+              max_tokens: template.maxTokens || 500,
+              top_p: template.topP || 1,
+              frequency_penalty: template.frequencyPenalty || 0,
+              presence_penalty: template.presencePenalty || 0,
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            // Set the AI-generated content in the campaign content
+            setAITemplateContent(data.text);
+            setFormData(prev => ({
+              ...prev,
+              content: data.text
+            }));
+          } else {
+            const errorData = await response.json();
+            console.error("Error generating content:", errorData.error);
+            setError("Failed to generate content with AI: " + errorData.error);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching AI template:", error);
+      setError("Failed to load AI template");
+    } finally {
+      setIsLoadingAITemplate(false);
+    }
+  };
+
+  // Handle AI template selection
+  const handleAITemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const templateId = e.target.value;
+    setSelectedAITemplate(templateId);
+    if (templateId) {
+      fetchAITemplateContent(templateId);
+    }
+  };
+
+  // Handle AI customization checkbox
+  const handleAICustomizationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setUseAICustomization(e.target.checked);
+    
+    // If unchecked, revert to selected email template content if any
+    if (!e.target.checked && formData.templateId) {
+      fetchTemplateContent(formData.templateId);
+    }
+  };
+
   if (isLoading || isLoadingData) {
     return (
       <div className="flex min-h-screen items-center justify-center dark:bg-dark-bg">
@@ -487,6 +583,67 @@ export default function NewCampaignPage() {
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500 sm:text-sm dark:bg-dark-card dark:border-dark-accent dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500"
           />
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Leave blank to save as draft. You can schedule the campaign later.</p>
+        </div>
+
+        {/* AI Customization Checkbox */}
+        <div className="mb-6">
+          <div className="flex items-center mb-2">
+            <input
+              type="checkbox"
+              id="aiCustomization"
+              checked={useAICustomization}
+              onChange={handleAICustomizationChange}
+              className="mr-2 h-4 w-4 rounded border-light-border text-brand-primary focus:ring-brand-primary dark:border-dark-accent"
+            />
+            <label htmlFor="aiCustomization" className="font-medium">AI Customization</label>
+          </div>
+          
+          {useAICustomization && (
+            <div className="mt-4 p-4 border rounded dark:border-dark-accent">
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">Select a template</label>
+                <div className="flex space-x-2">
+                  <select
+                    value={selectedAITemplate}
+                    onChange={handleAITemplateChange}
+                    className="w-full p-2 border rounded dark:bg-dark-input dark:border-dark-accent"
+                  >
+                    <option value="">Select a template</option>
+                    {aiTemplates.map((template) => (
+                      <option key={template.id} value={template.id}>
+                        {template.name}
+                      </option>
+                    ))}
+                  </select>
+                  <Link 
+                    href="/ai-prompt-studio" 
+                    className="flex items-center justify-center px-4 py-2 bg-brand-secondary text-white rounded-lg hover:bg-opacity-90 transition-colors"
+                    target="_blank"
+                  >
+                    Create new template
+                  </Link>
+                </div>
+              </div>
+              
+              {isLoadingAITemplate && (
+                <div className="flex justify-center my-4">
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-brand-primary"></div>
+                </div>
+              )}
+              
+              {selectedAITemplate && aiTemplateContent && !isLoadingAITemplate && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Generated Content</label>
+                  <div className="bg-gray-50 dark:bg-dark-input p-4 rounded border dark:border-dark-accent whitespace-pre-wrap mb-2">
+                    {aiTemplateContent}
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    This content will be used in your campaign. You can edit it in the content editor below.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Email Content */}
