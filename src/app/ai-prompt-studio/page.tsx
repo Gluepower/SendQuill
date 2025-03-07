@@ -9,6 +9,7 @@ interface PromptConfig {
   id: string;
   name: string;
   prompt: string;
+  model: string;
   temperature: number;
   maxTokens: number;
   topP: number;
@@ -18,6 +19,7 @@ interface PromptConfig {
 
 const defaultConfig: Omit<PromptConfig, "id" | "name"> = {
   prompt: "",
+  model: "gpt-3.5-turbo",
   temperature: 0.7,
   maxTokens: 200,
   topP: 1,
@@ -165,6 +167,7 @@ export default function AIPromptStudioPage() {
         },
         body: JSON.stringify({
           prompt: currentPrompt.prompt,
+          model: currentPrompt.model,
           temperature: currentPrompt.temperature,
           max_tokens: currentPrompt.maxTokens,
           top_p: currentPrompt.topP,
@@ -258,6 +261,21 @@ export default function AIPromptStudioPage() {
                   className="w-full p-2 border rounded h-32 resize-y dark:bg-dark-input dark:border-dark-accent"
                   placeholder="Write your prompt here..."
                 ></textarea>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Model</label>
+                <select
+                  value={currentPrompt.model}
+                  onChange={(e) => handleInputChange("model", e.target.value)}
+                  className="w-full p-2 border rounded dark:bg-dark-input dark:border-dark-accent"
+                >
+                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                  <option value="gpt-4">GPT-4</option>
+                  <option value="gpt-4o">GPT-4o</option>
+                  <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                  <option value="gpt-4-vision-preview">GPT-4 Vision</option>
+                </select>
               </div>
 
               <div>

@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       prompt,
+      model = "gpt-3.5-turbo",
       temperature = 0.7,
       max_tokens = 200,
       top_p = 1,
@@ -32,9 +33,24 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+    
+    const allowedModels = [
+      "gpt-3.5-turbo",
+      "gpt-4",
+      "gpt-4o",
+      "gpt-4-turbo",
+      "gpt-4-vision-preview"
+    ];
+    
+    if (!allowedModels.includes(model)) {
+      return NextResponse.json(
+        { error: `Invalid model specified. Allowed models are: ${allowedModels.join(", ")}` },
+        { status: 400 }
+      );
+    }
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model,
       messages: [{ role: "user", content: prompt }],
       temperature,
       max_tokens,
